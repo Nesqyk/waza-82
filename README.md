@@ -1,20 +1,29 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# WAZA · The Sumo Mechanics Index
 
-# Run and deploy your AI Studio app
+![WAZA splash](public/splash_image.png)
 
-This contains everything you need to run your app locally.
+A React + Vite playground for exploring all 82 sumo kimarite with live physics sketches, a referee quiz mode, and an admin editor that writes directly to Firebase.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1Ikvl0-ZcZNvEoM5T7wAICR0Yc1Bn13vS
+## Quickstart
 
-## Run Locally
+```bash
+cp .env.local.example .env.local   # or create manually with Firebase creds
+npm install
+npm run dev
+```
 
-**Prerequisites:**  Node.js
+- `npm run export:techniques` – dumps the static `TECHNIQUES` array to `scripts/techniques.json`.
+- `npm run seed` – pushes that JSON into Firestore (requires `scripts/serviceAccountKey.json`).
+- `npm run test` – Playwright smoke suite (deck, detail, admin, referee routes).
 
+## Firebase Notes
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+1. Create a Firebase Web App and copy the config into `.env.local`:
+   ```
+   VITE_FIREBASE_API_KEY=...
+   VITE_FIREBASE_AUTH_DOMAIN=...
+   ```
+2. Add at least one admin user, then create the Firestore document `admins/{uid}` so the Dojo Editor unlocks.
+3. Deploy the included `firestore.rules` for public-read / admin-write protection.
+
+That’s it—run `npm run dev`, browse `#/` for the deck, `#/referee` for Gyōji Mode, and `#/admin` for the keyframe editor.

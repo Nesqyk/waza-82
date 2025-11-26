@@ -13,6 +13,7 @@
     "test:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@netlify/vite-plugin": "^2.7.14",
     "firebase": "^12.6.0",
     "lucide-react": "^0.554.0",
     "react": "^19.2.0",
