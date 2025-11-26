@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { TECHNIQUES } from '../constants';
+import { useTechniques } from '../hooks/useTechniques';
 import PhysicsVisualizer from '../components/PhysicsVisualizer';
-import { ArrowLeft, Play, Pause, Layers, Share2, Check, Split, X, Search, Info, Quote } from 'lucide-react';
+import { ArrowLeft, Play, Pause, Layers, Share2, Check, Split, X, Search, Info, Quote, Loader2 } from 'lucide-react';
 import { Rarity } from '../types';
 
 const TechniqueDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { techniques: TECHNIQUES, loading } = useTechniques();
   const technique = TECHNIQUES.find(t => t.id === id);
   
   const [isPlaying, setIsPlaying] = useState(true);
@@ -84,6 +85,14 @@ const TechniqueDetail: React.FC = () => {
         default: return 'bg-stone-200 text-stone-600';
      }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-stone-400" />
+      </div>
+    );
+  }
 
   if (!technique) {
     return <div className="p-12 text-center font-serif text-stone-400 italic">Technique not found within the archives.</div>;

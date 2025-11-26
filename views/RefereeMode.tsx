@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { TECHNIQUES } from '../constants';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useTechniques } from '../hooks/useTechniques';
 import PhysicsVisualizer from '../components/PhysicsVisualizer';
 import { Technique } from '../types';
-import { Shield, RefreshCw, CheckCircle2, XCircle, Heart, Trophy, Play, Timer } from 'lucide-react';
+import { Shield, RefreshCw, CheckCircle2, XCircle, Heart, Trophy, Play, Timer, Loader2 } from 'lucide-react';
 
 const RefereeMode: React.FC = () => {
+  const { techniques: TECHNIQUES, loading } = useTechniques();
+
   // Game State
   const [gamePhase, setGamePhase] = useState<'start' | 'playing' | 'gameover'>('start');
   const [currentTechnique, setCurrentTechnique] = useState<Technique | null>(null);
@@ -20,14 +22,8 @@ const RefereeMode: React.FC = () => {
 
   // --- Game Loop Logic ---
 
-  const startGame = () => {
-    setScore(0);
-    setLives(3);
-    setGamePhase('playing');
-    setupRound();
-  };
-
-  const setupRound = () => {
+  const setupRound = useCallback(() => {
+    if (TECHNIQUES.length === 0) return;
     const randomTech = TECHNIQUES[Math.floor(Math.random() * TECHNIQUES.length)];
     setCurrentTechnique(randomTech);
     
@@ -41,6 +37,13 @@ const RefereeMode: React.FC = () => {
     setRoundState('guessing');
     setFrameIndex(0);
     setTimeLeft(15);
+  }, [TECHNIQUES]);
+
+  const startGame = () => {
+    setScore(0);
+    setLives(3);
+    setGamePhase('playing');
+    setupRound();
   };
 
   // Timer Logic
@@ -107,6 +110,14 @@ const RefereeMode: React.FC = () => {
   };
 
   // --- Renders ---
+
+  if (loading) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-stone-400" />
+      </div>
+    );
+  }
 
   if (gamePhase === 'start') {
     return (

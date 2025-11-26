@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { SkeletonFrame, Vector2, Technique, Rarity } from '../types';
-import { TECHNIQUES } from '../constants';
-import { Copy, Move, Plus, Trash2, Play, Pause, Layers, ArrowUpRight, Settings2, FilePlus, Edit2, Search, Filter, Monitor, PenTool, ChevronDown, ChevronRight } from 'lucide-react';
+import { useTechniques } from '../hooks/useTechniques';
+import { Copy, Move, Plus, Trash2, Play, Pause, Layers, ArrowUpRight, Settings2, FilePlus, Edit2, Search, Filter, Monitor, PenTool, ChevronDown, ChevronRight, Loader2, Save } from 'lucide-react';
 
 // Default starting pose
 const INITIAL_FRAME: SkeletonFrame = {
@@ -30,6 +30,8 @@ type DragTarget =
   | { type: 'force-tip', index: number };
 
 const AdminEditor: React.FC = () => {
+  const { techniques: TECHNIQUES, loading, saveTechnique, removeTechnique } = useTechniques();
+
   // Animation State
   const [frames, setFrames] = useState<SkeletonFrame[]>([INITIAL_FRAME]);
   const [currentFrameIndex, setCurrentFrameIndex] = useState(0);
@@ -55,6 +57,7 @@ const AdminEditor: React.FC = () => {
   const [loadedId, setLoadedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [rarityFilter, setRarityFilter] = useState<Rarity | 'ALL'>('ALL');
+  const [saving, setSaving] = useState(false);
 
   // Layout State
   const [mobileTab, setMobileTab] = useState<'canvas' | 'studio'>('canvas');
@@ -122,12 +125,50 @@ const AdminEditor: React.FC = () => {
     setIsPlaying(false);
   };
 
-  const handleDeleteTechnique = (id: string) => {
-     if (window.confirm(`Are you sure you want to delete ${id}? Note: You must manually delete it from constants.ts code. This action only clears the editor.`)) {
-         if (loadedId === id) {
-             handleNewTechnique();
+  const handleDeleteTechnique = async (id: string) => {
+     if (window.confirm(`Are you sure you want to delete ${id}? This will remove it from Firestore.`)) {
+         try {
+           await removeTechnique(id);
+           if (loadedId === id) {
+               handleNewTechnique();
+           }
+         } catch (err) {
+           console.error('Delete failed:', err);
+           alert('Failed to delete technique.');
          }
      }
+  };
+
+  const handleSaveToFirestore = async () => {
+    if (!metadata.id) {
+      alert('Please provide a technique ID.');
+      return;
+    }
+    setSaving(true);
+    try {
+      const fullTechnique: Technique = {
+        id: metadata.id!,
+        name: metadata.name || '',
+        kanji: metadata.kanji || '',
+        translation: metadata.translation || '',
+        rarity: metadata.rarity || Rarity.COMMON,
+        description: metadata.description || '',
+        mechanics: {
+          principle: metadata.mechanics?.principle || '',
+          keyPoints: keyPointsString.split(',').map(s => s.trim()).filter(s => s.length > 0)
+        },
+        practitioners: practitionersString.split(',').map(s => s.trim()).filter(s => s.length > 0),
+        animationFrames: frames
+      };
+      await saveTechnique(fullTechnique);
+      setLoadedId(fullTechnique.id);
+      alert('Technique saved to Firestore!');
+    } catch (err) {
+      console.error('Save failed:', err);
+      alert('Failed to save technique.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   // --- INTERACTION HANDLERS ---
@@ -749,7 +790,15 @@ const AdminEditor: React.FC = () => {
                  <div className="flex-grow p-4 bg-stone-800 text-stone-100 font-mono text-xs overflow-auto">
                     <pre>{jsonOutput}</pre>
                  </div>
-                 <div className="p-4 bg-white border-t border-stone-200">
+                 <div className="p-4 bg-white border-t border-stone-200 space-y-3">
+                    <button 
+                      onClick={handleSaveToFirestore}
+                      disabled={saving}
+                      className="w-full py-3 bg-vermillion text-white font-bold uppercase tracking-widest hover:bg-indigo transition-colors flex items-center justify-center gap-2 rounded-sm disabled:opacity-50"
+                    >
+                      {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                      {saving ? 'Saving...' : 'Save to Firestore'}
+                    </button>
                     <button 
                       onClick={copyToClipboard}
                       className="w-full py-3 bg-sumi text-white font-bold uppercase tracking-widest hover:bg-indigo transition-colors flex items-center justify-center gap-2 rounded-sm"
@@ -757,7 +806,7 @@ const AdminEditor: React.FC = () => {
                       <Copy className="w-4 h-4" /> Copy Code
                     </button>
                     <p className="text-xs text-stone-400 mt-2 text-center">
-                      Paste into <code>constants.ts</code> in the <code>TECHNIQUES</code> array.
+                      Save directly to Firestore or copy JSON for manual insertion.
                     </p>
                  </div>
               </div>

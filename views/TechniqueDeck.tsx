@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { TECHNIQUES } from '../constants';
+import { useTechniques } from '../hooks/useTechniques';
 import TechniqueCard from '../components/TechniqueCard';
 import { useNavigate } from 'react-router-dom';
-import { Search, ChevronDown, AlignLeft, Trophy, Star, Zap, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ChevronDown, AlignLeft, Trophy, Star, Zap, Shield, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Rarity } from '../types';
 
 type SortOption = 'name_asc' | 'name_desc' | 'rarity_asc' | 'rarity_desc';
@@ -11,6 +11,7 @@ const ITEMS_PER_PAGE = 12;
 
 const TechniqueDeck: React.FC = () => {
   const navigate = useNavigate();
+  const { techniques: TECHNIQUES, loading } = useTechniques();
   const [filter, setFilter] = useState('');
   const [sortOption, setSortOption] = useState<SortOption>('name_asc');
   const [showSortMenu, setShowSortMenu] = useState(false);
@@ -92,6 +93,14 @@ const TechniqueDeck: React.FC = () => {
        <span className={`ml-1 text-[10px] font-mono ${activeRarity === type ? 'text-stone-400' : 'text-stone-300'}`}>{count}</span>
     </button>
   );
+
+  if (loading) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-stone-400" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-12 min-h-screen">

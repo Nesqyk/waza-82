@@ -6,12 +6,23 @@ import TechniqueDetail from './views/TechniqueDetail';
 import RefereeMode from './views/RefereeMode';
 import AdminEditor from './views/AdminEditor';
 import AdminLogin from './views/AdminLogin';
+import { useAuth } from './hooks/useAuth';
 
 const ProtectedAdminRoute = ({ children }: { children: React.ReactElement }) => {
-  const isAuthenticated = sessionStorage.getItem('waza_admin') === 'true';
-  if (!isAuthenticated) {
+  const { user, isAdmin, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+        <p className="text-stone-400 text-sm uppercase tracking-widest">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!user || !isAdmin) {
     return <Navigate to="/login" replace />;
   }
+
   return children;
 };
 
