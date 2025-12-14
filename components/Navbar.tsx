@@ -24,9 +24,7 @@ const Navbar: React.FC = () => {
       {/* Logo */}
       <div className="flex items-center gap-4 z-50">
         <Link to="/" className="flex items-center gap-2 group" onClick={() => setIsMobileMenuOpen(false)}>
-          <div className="w-8 h-8 bg-sumi text-washi flex items-center justify-center font-serif font-bold text-lg rounded-sm group-hover:bg-vermillion transition-colors">
-            W
-          </div>
+          <img src="/logo.svg" alt="WAZA logo" className="w-8 h-8 object-contain rounded-sm group-hover:opacity-90 transition-opacity" />
           <span className="font-serif font-bold tracking-tighter text-xl">
             WAZA <span className="font-sans font-normal text-xs text-stone-500 ml-1 tracking-wide opacity-60 hidden sm:inline">SUMO MECHANICS</span>
           </span>

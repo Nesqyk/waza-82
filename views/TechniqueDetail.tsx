@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTechniques } from '../hooks/useTechniques';
 import PhysicsVisualizer from '../components/PhysicsVisualizer';
+import Seo from '../components/Seo';
 import { ArrowLeft, Play, Pause, Layers, Share2, Check, Split, X, Search, Info, Quote, Loader2 } from 'lucide-react';
 import { Rarity } from '../types';
 
@@ -98,6 +99,11 @@ const TechniqueDetail: React.FC = () => {
     return <div className="p-12 text-center font-serif text-stone-400 italic">Technique not found within the archives.</div>;
   }
 
+  // SEO: set per-technique meta and canonical (hash-based routes)
+  const canonical = `https://waza82.netlify.app/#/technique/${technique.id}`;
+  const seoTitle = `${technique.name} — WAZA`;
+  const seoDesc = technique.description;
+
   // Filter techniques for comparison modal
   const comparisonOptions = TECHNIQUES.filter(t => 
     t.id !== technique.id && 
@@ -106,6 +112,7 @@ const TechniqueDetail: React.FC = () => {
 
   return (
     <div className="flex flex-col lg:h-[calc(100vh-4rem)] lg:overflow-hidden">
+      <Seo title={seoTitle} description={seoDesc} image={'/splash.png'} canonical={canonical} url={canonical} />
       {/* Desktop Layout: Split View */}
       <div className="flex flex-col lg:flex-row h-full">
         
